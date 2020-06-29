@@ -60,7 +60,9 @@ blockquote > p::after {
 
 ## Alek Gruszczyński (gruszal@gmail.com)
 
-prezentacja i kod dostępne są tutaj: ![](githubqr.png)
+prezentacja i kod dostępne są tutaj: https://github.com/gruszal/pygda57
+
+![](githubqr.png)
 
 ---
 
@@ -153,8 +155,8 @@ Dwukropek oddziela dwie ścieżki.
 ---
 # Kluczowa wiedza:
 
-- Za pomocą zmiennej środowiskowej `PYTHONPATH` można rozszerzyć listę katalogów przeszukiwanych w poszukiwaniu modułu do zaimportowania.
-- Uruchamiając skrypt, interpreter pythona automatycznie dodaje katalog z tym skryptem do zmiennej środowiskowej `PYTHONPATH`.
+- Za pomocą zmiennej środowiskowej `PYTHONPATH` można rozszerzyć listę ścieżek przeszukiwanych w poszukiwaniu modułu do zaimportowania.
+- Uruchamiając skrypt, interpreter pythona automatycznie dodaje katalog z tym skryptem do listy przeszukiwanych ścieżek.
 
 ---
 # Jak nie dać się wpakować w całe powyższe zamieszanie?
@@ -163,13 +165,17 @@ Dwukropek oddziela dwie ścieżki.
 - Jasno określić "roota" projektu i konsekwentnie importować moduły z tego miejsca
 - Unikać modułów, które są importowane przez inne moduły i jednocześnie bezpośrednio uruchamiane.
     - Jeśli nie da się/nie chcemy tego uniknąć, należy pamiętać o wyeksportowaniu zmiennej środowiskowej `PYTHONPATH` z rootem naszego projektu.
-- Używać opcji "Add source roots to PYTHONPATH" tylko okazjonalnie (np. na czas debugowania)
+- Używać opcji "Add source roots to PYTHONPATH" w wyjątkowych sytuacjach (np. na czas debugowania)
 ---
 # BONUS: importowanie spakowanych modułów/pakietów
 
 Dodając do zmiennej `PYTHONPATH` ścieżkę do pliku zip, Python rozpakuje źródła w pamięci i będzie traktował je jak zwykły katalog. Jest to możliwe dzięki modułowi `zipimport`(https://docs.python.org/3/library/zipimport.html).
 
 [stage1_ex5]
+
+- uruchom `module_a.py`
+- `zip -rm b.zip b`
+- odkomentuj linikję 2 w `module_a.py` i uruchom go 
 
 ---
 # 2. Importy relatywne i ich zwodnicza natura
