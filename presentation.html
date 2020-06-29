@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>Presentation</title>
+    <meta charset="utf-8">
+<style>
+* {
+	font-family: serif
+}
+
+p {
+	font-size: 26px;
+}
+
+h1 > code.remark-inline-code {
+	font-size: 35px;
+}
+
+code.remark-inline-code, code > div {
+	font-family: monospace;
+	background: aliceblue;
+	padding: 5px
+}
+
+code > div > span {
+	font-family: monospace;
+}
+
+code.remark-inline-code {
+	font-size: 20px;
+}
+
+li {
+	font-size: 26px;
+	padding: 4px;
+}
+
+blockquote {
+	padding: 10px;
+	padding-left: 30px;
+	background: blanchedalmond;
+	font-style: italic;
+	font-size: 26px;
+}
+
+blockquote > p::before {
+	content: open-quote
+}
+
+blockquote > p::after {
+	content: close-quote
+}
+</style
+  </head>
+  <body>
+    <textarea id="source">
+# Wiedza z importu
+
+## PyGDA#57 - 29.06.2020
+
+## Alek Gruszczyński (gruszal@gmail.com)
+
+prezentacja i kod dostępne są tutaj: ![](githubqr.png)
+
+---
+
+# Dlaczego ten temat?
+
+- `import` to podstawowe narzędzie programisty Pythona
+- używany intuicyjnie `import` _zwykle_ działa
+- napotykając problemy z importowaniem, rozwiązywanie ich polegając _nadal_ na intuicji powoduje więcej problemów niż pożytku
+- sprawia problemy początkującym w niespodziewanych momentach
+- za mało jest prezentacji o podstawach Pythona
+
+---
+# Tematy na dziś:
+
+### 1. Pycharm uszczęśliwia nas na siłę
+### 2.  Importy relatywne i ich zwodnicza natura
+### 3. Co tak _naprawdę_ importuje gwiazdka?
+
+---
+# 1. Pycharm uszczęśliwia nas na siłę
+
+---
+# Problem
+
+Wśród początkujących, pierwsze problemy z importami pojawiają się, gdy projekt rozwijany w Pycharmie nagle trzeba uruchomić z linii poleceń.
+
+> Dziwne, u mnie działa.
+
+[stage1_ex1]
+
+- otwórz katalog `stage1_ex1` jako projekt w Pycharmie
+- uruchom `b/module_b.py` z Pycharma
+- uruchom `python3 b/module_b.py` z linii poleceń
+
+---
+# Dwie pomocne linijki 
+
+```py
+import sys
+print(sys.path)
+```
+
+Lista `sys.path` zawiera ścieżki przeszukiwane przez pythonowy mechachanizm importujący w poszukiwaniu modułu do zaimportowania.
+
+[stage1_ex2]
+
+Uruchamiając skrypt `module_b.py` z Pycharma i z linii poleceń, zawartości `sys.path` listy różnią się.
+
+---
+# Winowajca
+
+Głównym winowajcą całego zamieszania jest "Run/Debug Configuration" i dwie domyślnie włączone opcje:
+
+![](screenshot1.png)
+
+- pierwsza dodaje root naszego projektu do zmiennej środowiskowej `PYTHONPATH`
+- druga dodaje katalogi zaznaczone przez nas jako "sources root" do `PYTHONPATH`
+
+---
+# PYTHONPATH i jego modyfikacja poza Pycharmem
+
+Z wnętrza skryptu:
+
+[stage1_ex3]
+
+```py
+import sys
+sys.path.append('../b')
+sys.path.append('../c')
+```
+---
+# PYTHONPATH i jego modyfikacja poza Pycharmem
+
+Z linii poleceń (Linux):
+
+[stage1_ex4]
+
+```bash
+export PYTHONPATH=b:c
+python3 a/module_a.py
+```
+lub
+
+```bash
+PYTHONPATH=b:c python3 a/module_a.py
+```
+
+Dwukropek oddziela dwie ścieżki.
+
+---
+# Kluczowa wiedza:
+
+- Za pomocą zmiennej środowiskowej `PYTHONPATH` można rozszerzyć listę katalogów przeszukiwanych w poszukiwaniu modułu do zaimportowania.
+- Uruchamiając skrypt, interpreter pythona automatycznie dodaje katalog z tym skryptem do zmiennej środowiskowej `PYTHONPATH`.
+
+---
+# Jak nie dać się wpakować w całe powyższe zamieszanie?
+(Uwaga! Osobiste opinie!)
+
+- Jasno określić "roota" projektu i konsekwentnie importować moduły z tego miejsca
+- Unikać modułów, które są importowane przez inne moduły i jednocześnie bezpośrednio uruchamiane.
+    - Jeśli nie da się/nie chcemy tego uniknąć, należy pamiętać o wyeksportowaniu zmiennej środowiskowej `PYTHONPATH` z rootem naszego projektu.
+- Używać opcji "Add source roots to PYTHONPATH" tylko okazjonalnie (np. na czas debugowania)
+---
+# BONUS: importowanie spakowanych modułów/pakietów
+
+Dodając do zmiennej `PYTHONPATH` ścieżkę do pliku zip, Python rozpakuje źródła w pamięci i będzie traktował je jak zwykły katalog. Jest to możliwe dzięki modułowi `zipimport`(https://docs.python.org/3/library/zipimport.html).
+
+[stage1_ex5]
+
+---
+# 2. Importy relatywne i ich zwodnicza natura
+
+---
+# Problem
+
+[stage2_ex1]
+
+- uruchom skrypt `module_a.py` - działa
+- uruchom skrypt `b/module_b1.py` - nie zadziała, gdyż:
+```
+ImportError: attempted relative import with no known parent package
+```
+
+> Ale jak to? Przecież te dwa moduły są w tym samym katalogu!
+
+---
+# Dlaczego "zwodnicza" natura?
+
+Struktura pakietów i modułów w projekcie pythonowym odpowiada strukturze katalogów w których się one znajdują.
+
+Przez analogię do systemu plików, używając relatywnych importów (zaczynających się od jednej lub większej ilości kropek) możemy odnieść **mylne** wrażenie, że pojedyncza kropka oznacza _bieżący katalog_ a podwójna kropka _katalog wyżej_.
+
+---
+# Prawdziwa natura relatywnych importów:
+
+- Pojedyncza kropka oznacza poszukiwanie importowanego modułu w pakiecie nadrzędnym (rodzicu) bieżącego.
+- Dwie kropki oznaczają poszukiwanie w pakiecie nadrzędnym, pakietu nadrzędnego do bieżącego.
+- Każda kolejna kropka prowadzi nas wyżej w hierarchii.
+
+W zaobserwowaniu działania tego mechanizmu pomogą nam dwa atrybuty modułu/pakietu:
+- `__name__` - nazwa bieżącego modułu/pakietu
+- `__package__` - atrybut wykorzystywany w wyliczaniu właściwego modułu/pakietu do zaimportowania.
+
+[stage2_ex2]
+
+---
+# Hack!
+Nikt nas nie powstrzyma, przed zmodyfikowaniem atrybutu `__package__` :)
+
+[stage2_ex3]
+
+---
+# 3. Co tak _naprawdę_ importuje gwiazdka?
+
+---
+# Problem
+
+[stage3_ex1]
+
+Uruchom skrypt `module_a.py`
+
+> Ale czemu nie ma moich wszystkich obiektów?
+
+---
+# Rozwiązanie
+
+`from module import *` importuje wszystkie **publiczne** nazwy.
+
+Publiczne, czyli nie `_protected` i nie `__private`.
+
+> Ale ja _bardzo_ chcę importować również tamte nazwy!
+
+---
+# Rozwiązanie 2
+
+[stage3_ex2]
+
+Jeśli moduł posiada atrybut `__all__`, ustawiony na listę nazw obiektów, to **te i tylko te** nazwy zostaną zaimportowane przez `from modul import *`.
+
+Uwaga! Atrybut `__all__` **nie musi** pojawić się przed importowanymi nazwami.
+
+---
+# Jeszcze jedno użycie `__all__`
+
+Importowanie konkretnych modułów z pakietu.
+
+[stage3_ex3]
+
+---
+# Podsumowanie:
+
+Jako podsumowanie, niech posłuży zamykające zdanie z dokumentacji (https://docs.python.org/3/tutorial/modules.html#importing-from-a-package)
+
+>Remember, there is nothing wrong with using `from package import specific_submodule`! **In fact, this is the recommended notation** unless the importing module needs to use submodules with the same name from different packages.
+
+To zdanie podsumowuje temat tego segmentu, jak i całej prezentacji :)
+
+---
+# Link dla mega-zmotywowanych:
+David Beazley - Modules and Packages: Live and Let Die! PyCon 2015
+
+https://www.youtube.com/watch?v=0oTh1CXRaQ0   
+
+Zalety:
+- David Beazley!
+- ogrom wiedzy 
+
+Wady:
+- karygodna jakość dźwięku
+- trzy godziny!
+
+---
+# Dziękuję za uwagę!
+
+    </textarea>
+    
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({ratio: '16:9', slideNumberFormat: '(%current%/%total%)', countIncrementalSlides: false, highlightLines: true});</script>
+ </body>
+</html>
